@@ -19,17 +19,46 @@ fn main() {
 
     let camera = Camera::new(VIEWPORT_HEIGHT, ASPECT_RATIO, FOCAL_LENGTH);
     //Environment
-    let lambertian: Rc<dyn materials::Mat> = Rc::new(
-        materials::Lambertian::new(Vec3::new(0.5, 0.5, 0.5)
+    let material_ground: Rc<dyn materials::Mat> = Rc::new(
+        materials::Lambertian::new(Vec3::new(0.8, 0.8, 0.0)
     ));
-
+    let material_center: Rc<dyn materials::Mat> = Rc::new(
+        materials::Lambertian::new(Vec3::new(0.7, 0.3, 0.3)
+    ));
+    let material_left: Rc<dyn materials::Mat> = Rc::new(
+        materials::Metal::new(Vec3::new(0.8, 0.8, 0.8)
+    ));
+    let material_right: Rc<dyn materials::Mat> = Rc::new(
+        materials::Metal::new(Vec3::new(0.8, 0.6, 0.2)
+    ));
+    
     let mut world = HittableList::default();
     world.add(
         Box::new(
             Sphere::new(
                 Point::new(0.0, 0.0, -1.0),
                 0.5,
-                Rc::clone(&lambertian)
+                Rc::clone(&material_center)
+            )
+        )
+    );
+
+    world.add(
+        Box::new(
+            Sphere::new(
+                Point::new(-1.0, 0.0, -1.0),
+                0.5,
+                Rc::clone(&material_left)
+            )
+        )
+    );
+
+    world.add(
+        Box::new(
+            Sphere::new(
+                Point::new(1.0, 0.0, -1.0),
+                0.5,
+                Rc::clone(&material_right)
             )
         )
     );
@@ -39,7 +68,7 @@ fn main() {
             Sphere::new(
                 Point::new(0.0, -100.5, -1.0),
                 100.0,
-                Rc::clone(&lambertian)
+                Rc::clone(&material_ground)
             )
         )
     );

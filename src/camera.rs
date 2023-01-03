@@ -74,7 +74,6 @@ fn ray_color(r: &Ray, world: &HittableList, depth: i32) -> Color {
                     None => Color::zero()
                 }
             }
-
             HitRecord::Miss =>{
                 let unit_dir = r.dir.unit();
                 let t = 0.5 *(unit_dir.y + 1.0);
