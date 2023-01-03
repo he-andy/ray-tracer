@@ -1,4 +1,5 @@
 use std::ops::{Neg, Add, Sub, Mul, Div, AddAssign, SubAssign, MulAssign, DivAssign};
+use crate::rand_range;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Vec3{
@@ -18,6 +19,23 @@ impl Vec3{
             x: 0.0,
             y: 0.0,
             z: 0.0
+        }
+    }
+    pub fn rand(min: f64, max: f64) -> Self{
+        Vec3 { 
+            x: rand_range(min, max), 
+            y: rand_range(min, max), 
+            z: rand_range(min, max) 
+        }
+    }
+
+    pub fn rand_within_unit_sphere() -> Self{
+        //rejection alg
+        loop{
+            let res = Self::rand(-1.0, 1.0);
+            if res.l2() <= 1.0{
+                return res
+            }
         }
     }
 
@@ -47,9 +65,33 @@ impl Vec3{
 
     pub fn unit(&self) -> Self{
         let len = self.length();
-        self.scale(1.0/len)
+        Vec3{
+            x: self.x / len,
+            y: self.y / len,
+            z: self.z / len
+        }
     }
 
+    pub fn clamp(&self) -> Self{
+        Vec3 { 
+            x: self.x.clamp(0.0, 0.9999),
+            y: self.y.clamp(0.0, 0.9999),
+            z: self.z.clamp(0.0, 0.9999),
+        }
+    }
+    
+    pub fn sqrt(&self) -> Self{
+        Vec3{
+            x: self.x.sqrt(),
+            y: self.y.sqrt(),
+            z: self.z.sqrt(),
+        }
+    }
+
+    pub fn near_zero(&self) -> bool{
+        let thresh = 1e-8;
+        self.x.abs() < thresh && self.y.abs() < thresh && self.z.abs() < thresh
+    }
 }
 
 impl Neg for Vec3{
@@ -77,7 +119,11 @@ impl Add for Vec3{
 impl Sub for Vec3{
     type Output = Self;
     fn sub(self, other: Self) -> Self {
-        self.add(-other)
+        Self {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
+        }
     }
 }
 
@@ -111,8 +157,8 @@ impl Mul<Vec3> for f64 {
     fn mul(self, vec: Vec3) -> Vec3 {
         Vec3 {
             x: self * vec.x,
-            y: self * vec.x,
-            z: self * vec.x,
+            y: self * vec.y,
+            z: self * vec.z,
         }
     }
 }
@@ -123,8 +169,8 @@ impl Div<Vec3> for f64 {
     fn div(self, vec: Vec3) -> Vec3 {
         Vec3 {
             x: self / vec.x,
-            y: self / vec.x,
-            z: self / vec.x,
+            y: self / vec.y,
+            z: self / vec.z,
         }
     }
 }
@@ -155,7 +201,7 @@ impl AddAssign for Vec3{
         *self = Self{
             x: self.x + other.x,
             y: self.y + other.y,
-            z: self.y + other.z,
+            z: self.z + other.z,
         }
     }
 }
@@ -165,7 +211,7 @@ impl SubAssign for Vec3{
         *self = Self{
             x: self.x - other.x,
             y: self.y - other.y,
-            z: self.y - other.z,
+            z: self.z - other.z,
         }
     }
 }
@@ -175,7 +221,7 @@ impl MulAssign for Vec3{
         *self = Self{
             x: self.x + other.x,
             y: self.y + other.y,
-            z: self.y + other.z,
+            z: self.z + other.z,
         }
     }
 }
@@ -185,7 +231,7 @@ impl DivAssign for Vec3{
         *self = Self{
             x: self.x / other.x,
             y: self.y / other.y,
-            z: self.y / other.z,
+            z: self.z / other.z,
         }
     }
 }
