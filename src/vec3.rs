@@ -33,7 +33,17 @@ impl Vec3{
         //rejection alg
         loop{
             let res = Self::rand(-1.0, 1.0);
-            if res.l2() <= 1.0{
+            if res.l2() <= 1.0 {
+                return res
+            }
+        }
+    }
+
+    pub fn random_in_unit_disk() -> Self{
+        loop{
+            let mut res = Self::rand(-1.0, 1.0);
+            res.z = 0.0;
+            if res.l2() <= 1.0 {
                 return res
             }
         }
@@ -92,6 +102,8 @@ impl Vec3{
         let thresh = 1e-8;
         self.x.abs() < thresh && self.y.abs() < thresh && self.z.abs() < thresh
     }
+
+   
 }
 
 impl Neg for Vec3{

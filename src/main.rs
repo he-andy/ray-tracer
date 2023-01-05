@@ -4,7 +4,7 @@ use std::rc::Rc;
 fn main() {
     //Image 
     const ASPECT_RATIO : f64 = 16.0/9.0;
-    const IMAGE_WIDTH : i32 = 400;
+    const IMAGE_WIDTH : i32 = 720;
     const IMAGE_HEIGHT : i32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as i32;
 
     // if let Err(e) = gradient(IMAGE_WIDTH, IMAGE_HEIGHT){
@@ -13,11 +13,14 @@ fn main() {
     // }
 
     //Camera
+    let look_from = Point::new(3.0, 3.0, 2.0);
+    let look_at = Point::new(0.0, 0.0, -1.0);
+    let v_up = Point::new(0.0, 1.0, 0.0);
+    let dist_to_focus = (look_from - look_at).length();
+    let aperture = 2.0;
 
-    const VIEWPORT_HEIGHT : f64 = 2.0;
-    const FOCAL_LENGTH : f64 = 1.0;
+    let camera = Camera::new(20.0, ASPECT_RATIO, &look_from, &look_at, &v_up, dist_to_focus, aperture);
 
-    let camera = Camera::new(VIEWPORT_HEIGHT, ASPECT_RATIO, FOCAL_LENGTH);
     //Environment
     let material_ground: Rc<dyn materials::Mat> = Rc::new(
         materials::Lambertian::new(Vec3::new(0.8, 0.8, 0.0)
@@ -26,12 +29,13 @@ fn main() {
         materials::Lambertian::new(Vec3::new(0.7, 0.3, 0.3)
     ));
     let material_left: Rc<dyn materials::Mat> = Rc::new(
-        materials::Metal::new(Vec3::new(0.8, 0.8, 0.8)
-    ));
+        materials::Dielectric::new(1.5)
+    );
     let material_right: Rc<dyn materials::Mat> = Rc::new(
-        materials::Metal::new(Vec3::new(0.8, 0.6, 0.2)
+        materials::Metal::new(Vec3::new(0.8, 0.6, 0.2),
+        1.0
     ));
-    
+
     let mut world = HittableList::default();
     world.add(
         Box::new(
@@ -48,6 +52,16 @@ fn main() {
             Sphere::new(
                 Point::new(-1.0, 0.0, -1.0),
                 0.5,
+                Rc::clone(&material_left)
+            )
+        )
+    );
+
+    world.add(
+        Box::new(
+            Sphere::new(
+                Point::new(-1.0, 0.0, -1.0),
+                -0.4,
                 Rc::clone(&material_left)
             )
         )
@@ -84,5 +98,4 @@ fn main() {
     //     eprintln!("Application Error: {e}");
     //     process::exit(1);
     // }
-    drop(world);
 }
