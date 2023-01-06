@@ -1,4 +1,4 @@
-use crate::{Point, Vec3, Ray};
+use crate::{Point, Vec3, Ray, Sphere};
 use crate::materials::*;
 use std::process;
 use std::rc::Rc;
@@ -51,6 +51,18 @@ pub struct HittableList{
 impl HittableList{
     pub fn add(&mut self, h: Box<dyn Hittable>){
         self.list.push(h);
+    }
+
+    pub fn add_sphere(&mut self, center: Point, r: f64, mat: Rc::<dyn Mat>) {
+        self.list.push(
+            Box::new(
+                Sphere::new(
+                    center,
+                    r,
+                    mat
+                )
+            )
+        );
     }
 
     pub fn clear(&mut self){

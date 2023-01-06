@@ -21,6 +21,11 @@ impl Vec3{
             z: 0.0
         }
     }
+    
+    pub fn default() -> Self{
+        Self::zero()
+    }
+
     pub fn rand(min: f64, max: f64) -> Self{
         Vec3 { 
             x: rand_range(min, max), 

@@ -3,6 +3,8 @@ mod ray;
 mod hittable;
 mod sphere;
 mod camera;
+mod image;
+
 pub mod materials;
 
 pub use vec3::{Vec3, Color, Point};
