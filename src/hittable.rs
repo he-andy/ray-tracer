@@ -1,15 +1,14 @@
-use crate::{Point, Vec3, Ray, Sphere};
+use crate::{Point, Vec3, Ray};
 use crate::materials::*;
 use std::process;
-use std::rc::Rc;
 
-pub enum HitRecord{
+pub enum HitRecord<'a>{
     Hit {
         normal: Vec3,
         p: Point,
         t: f64,
         front_face: bool,
-        material: Rc<dyn Mat>
+        material: &'a dyn Mat
     },
     Miss
 }
@@ -17,8 +16,8 @@ pub trait Hittable{
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> HitRecord;
 }
 
-impl HitRecord{
-    pub fn new(p: Point, t: f64, outward_norm: Vec3, r: &Ray, material: Rc<dyn Mat>) -> HitRecord{
+impl<'a> HitRecord<'a>{
+    pub fn new(p: Point, t: f64, outward_norm: Vec3, r: &Ray, material: &'a dyn Mat) -> HitRecord<'a>{
         let mut res = HitRecord::Hit { normal :Vec3::zero(), p, t, front_face: false, material};
         if let Result::Err(str) = res.set_face_normal(r, outward_norm){
             eprintln!("{str}");
@@ -49,19 +48,9 @@ pub struct HittableList{
 }
 
 impl HittableList{
-    pub fn add(&mut self, h: Box<dyn Hittable>){
-        self.list.push(h);
-    }
-
-    pub fn add_sphere(&mut self, center: Point, r: f64, mat: Rc::<dyn Mat>) {
+    pub fn add(&mut self, h: impl Hittable + 'static){
         self.list.push(
-            Box::new(
-                Sphere::new(
-                    center,
-                    r,
-                    mat
-                )
-            )
+            Box::new(h)
         );
     }
 

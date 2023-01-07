@@ -2,7 +2,7 @@ use crate::{Ray, Color, Vec3, Point};
 
 pub trait Mat{
     //returns Some of Color (attenuation) and Ray (scatter dir) or None
-    fn scatter(&self, r_in: &Ray, p: &Point, normal: &Vec3, front_face: bool) -> Option<(Color, Ray)>; 
+    fn scatter(&self, r_in: Ray, p: &Point, normal: &Vec3, front_face: bool) -> Option<(Color, Ray)>; 
 }
 
 pub struct Lambertian{
@@ -24,7 +24,7 @@ impl Lambertian{
 }
 
 impl Mat for Lambertian{
-    fn scatter(&self, _r_in: &Ray, p: &Point, normal: &Vec3, _front_face: bool) -> Option<(Color, Ray)> {
+    fn scatter(&self, _r_in: Ray, p: &Point, normal: &Vec3, _front_face: bool) -> Option<(Color, Ray)> {
         let mut scatter_dir = *normal + Vec3::rand_within_unit_sphere().unit();
         //fix degenerate case
         if scatter_dir.near_zero(){
@@ -62,7 +62,7 @@ impl Metal{
 }
 
 impl Mat for Metal {
-    fn scatter(&self, r_in: &Ray, p: &Point, normal: &Vec3, _front_face: bool) -> Option<(Color, Ray)> {
+    fn scatter(&self, r_in: Ray, p: &Point, normal: &Vec3, _front_face: bool) -> Option<(Color, Ray)> {
         let reflected = reflect(&r_in.dir.unit(), normal);
         let scattered = Ray::new(*p, reflected + self.fuzz * Vec3::rand_within_unit_sphere());
         if scattered.dir.dot(normal) > 0.0{
@@ -97,7 +97,7 @@ impl Dielectric{
 }
 
 impl Mat for Dielectric{
-    fn scatter(&self, r_in: &Ray, p: &Point, normal: &Vec3, front_face: bool) -> Option<(Color, Ray)> {
+    fn scatter(&self, r_in: Ray, p: &Point, normal: &Vec3, front_face: bool) -> Option<(Color, Ray)> {
         let att = Color::new(1.0, 1.0, 1.0);
         let refraction_ratio = if front_face{
             1.0/self.ir

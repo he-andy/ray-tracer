@@ -1,21 +1,20 @@
 use crate::hittable::{Hittable, HitRecord};
 use crate::{Point, Ray};
 use crate::materials::*;
-use std::rc::Rc;
 
-pub struct Sphere{
+pub struct Sphere<M: Mat>{
     pub center: Point,
     pub radius: f64,
-    pub material: Rc<dyn Mat>
+    pub material: M
 }
 
-impl Sphere{
-    pub fn new(center: Point, radius: f64, material: Rc<dyn Mat>) -> Self{
+impl<M: Mat> Sphere<M>{
+    pub fn new(center: Point, radius: f64, material: M) -> Self{
         Self { center, radius, material}
     }
 }
 
-impl Hittable for Sphere{
+impl<M: Mat> Hittable for Sphere<M>{
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> HitRecord{
         let oc = r.origin - self.center;
         let a = r.dir.l2();
@@ -39,6 +38,6 @@ impl Hittable for Sphere{
         let p = r.at(t);
         let normal = (p - self.center)/self.radius;
         
-        HitRecord::new(p, t, normal, &r, self.material.clone())
+        HitRecord::new(p, t, normal, &r, &self.material)
     }   
 }                                                                                       
