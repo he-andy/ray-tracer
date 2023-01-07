@@ -1,7 +1,4 @@
 use crate::*;
-use std::error::Error;
-use std::fs::File;
-use std::io::Write;
 
 const MAX_DEPTH: i32= 50;
 
@@ -68,9 +65,11 @@ impl Camera{
     pub fn render(&self, height: i32, world: &HittableList, n_samples: i32){
         let width = (height as f64 * self.aspect_ratio) as i32;
         let dims = (height, width);
-
+        let mut i = 0;
         let img = (0..n_samples).into_iter()
         .map(|_| {
+            i += 1;
+            println!("{i} renders finished");
             self.render_helper(dims, world, 1)
         })
         .fold(Image::new(height, width), |acc, x| acc + x)
