@@ -1,6 +1,6 @@
 use crate::{Ray, Color, Vec3, Point};
 
-pub trait Mat{
+pub trait Mat : Sync{
     //returns Some of Color (attenuation) and Ray (scatter dir) or None
     fn scatter(&self, r_in: Ray, p: &Point, normal: &Vec3, front_face: bool) -> Option<(Color, Ray)>; 
 }

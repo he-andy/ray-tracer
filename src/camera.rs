@@ -1,4 +1,7 @@
 use crate::*;
+use indicatif::{ParallelProgressIterator, ProgressStyle};
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+use rayon::prelude::*;
 
 const MAX_DEPTH: i32 = 50;
 
@@ -59,56 +62,45 @@ impl Camera {
         )
     }
 
-    fn ray_cast(
-        &self,
-        i: i32,
-        j: i32,
-        height: i32,
-        width: i32,
-        world: &HittableList,
-        n_samples: i32,
-    ) -> Color {
-        let mut color = Color::zero();
-        for _ in 0..n_samples {
-            let u = (i as f64 + rand()) / (width - 1) as f64;
-            let v = (j as f64 + rand()) / (height - 1) as f64;
+    fn ray_cast(&self, i: i32, j: i32, height: i32, width: i32, world: &HittableList) -> Color {
+        let u = (i as f64 + rand()) / (width - 1) as f64;
+        let v = (j as f64 + rand()) / (height - 1) as f64;
 
-            let r = self.get_ray(u, v);
-            color += ray_color(r, world, MAX_DEPTH)
-        }
-        color
+        let r = self.get_ray(u, v);
+        ray_color(r, world, MAX_DEPTH)
     }
 
     pub fn render(&self, height: i32, world: &HittableList, n_samples: i32) {
         let width = (height as f64 * self.aspect_ratio) as i32;
         let dims = (height, width);
-        let mut i = 0;
 
-        let img = (0..n_samples)
+        let style = ProgressStyle::with_template(
+            "[{elapsed_precise}] {bar:100.cyan/blue} {pos:>7}/{len:7} ({eta_precise})",
+        )
+        .unwrap()
+        .progress_chars("##-");
+
+        let res: Vec<Image> = (0..n_samples)
+            .into_par_iter()
+            .progress_with_style(style)
+            .map(|_| self.render_helper(dims, world))
+            .collect();
+        let img = res
             .into_iter()
-            .map(|_| {
-                i += 1;
-                println!("{i} renders finished");
-                self.render_helper(dims, world, 1)
-            })
-            .fold(Image::blank(height, width), |acc, x| {
-                eprintln!("{}", x.image.len());
-                acc + x
-            })
+            .fold(Image::blank(height, width), |acc, x| acc + x)
             .scale(1.0 / n_samples as f64)
             .clamp()
             .gamma_correction(2.0);
-        eprintln!("{}", img.image.len());
         img.save();
     }
 
-    pub fn render_helper(&self, dims: (i32, i32), world: &HittableList, n_samples: i32) -> Image {
+    pub fn render_helper(&self, dims: (i32, i32), world: &HittableList) -> Image {
         let (height, width) = dims;
         let mut img = Image::new(height, width);
 
         for j in (0..height).rev() {
             for i in 0..width {
-                let pixel_color = self.ray_cast(i, j, height, width, world, n_samples);
+                let pixel_color = self.ray_cast(i, j, height, width, world);
                 img.push(pixel_color);
             }
         }

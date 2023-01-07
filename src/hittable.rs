@@ -12,7 +12,7 @@ pub enum HitRecord<'a>{
     },
     Miss
 }
-pub trait Hittable{
+pub trait Hittable : Sync{
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> HitRecord;
 }
 
