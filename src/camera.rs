@@ -5,6 +5,7 @@ use std::io::Write;
 
 const MAX_DEPTH: i32= 50;
 
+#[derive(Debug, Clone, Copy)]
 pub struct Camera{
     origin: Point,
     horizontal: Vec3, 
@@ -61,23 +62,35 @@ impl Camera{
             let r = self.get_ray(u, v);
             color += ray_color(&r, world, MAX_DEPTH)
         }
-        (color / n_samples as f64).clamp()
+        color
     }
 
-    pub fn render(&self, height: i32, world: &HittableList, n_samples: i32) -> Result<(), Box<dyn Error>>{
-        let mut file = File::create("out.ppm")?;
+    pub fn render(&self, height: i32, world: &HittableList, n_samples: i32){
         let width = (height as f64 * self.aspect_ratio) as i32;
+        let dims = (height, width);
 
-        writeln!(&mut file, "P3\n{width} {height}\n255")?;
+        let img = (0..n_samples).into_iter()
+        .map(|_| {
+            self.render_helper(dims, world, 1)
+        })
+        .fold(Image::new(height, width), |acc, x| acc + x)
+        .scale(1.0/n_samples as f64)
+        .clamp()
+        .gamma_correction(2.0);
+
+        img.save();
+    }
+
+    pub fn render_helper(&self, dims: (i32, i32), world: &HittableList, n_samples: i32) -> Image{
+        let (height, width) = dims;
+        let mut img = Image::new(height, width);
         for j in (0..height).rev(){
-            eprint!("\rScanlines remaining: {j}");
             for i in 0..width{
                 let pixel_color = self.ray_cast(i, j, height, width, world, n_samples);
-                let gamma_corrected = pixel_color.sqrt();
-                write_color(&mut file, gamma_corrected)?;
+                img.push(pixel_color);
             }
         }
-        Ok(())
+        img
     }
 }
 
@@ -106,10 +119,3 @@ fn ray_color(r: &Ray, world: &HittableList, depth: i32) -> Color {
     }
 }
 
-fn write_color(file: &mut File, color: Vec3) -> Result<(), Box<dyn Error>>{
-    let ir = (255.999 * color.x) as i32;
-    let ig = (255.999 * color.y) as i32;
-    let ib = (255.999 * color.z) as i32;
-    writeln!(file, "{ir} {ig} {ib} ")?;
-    Ok(())
-}

@@ -1,7 +1,7 @@
 use std::ops::{Neg, Add, Sub, Mul, Div, AddAssign, SubAssign, MulAssign, DivAssign};
 use crate::rand_range;
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct Vec3{
     pub x: f64, 
     pub y: f64,
@@ -21,7 +21,7 @@ impl Vec3{
             z: 0.0
         }
     }
-    
+
     pub fn default() -> Self{
         Self::zero()
     }
@@ -100,6 +100,14 @@ impl Vec3{
             x: self.x.sqrt(),
             y: self.y.sqrt(),
             z: self.z.sqrt(),
+        }
+    }
+
+    pub fn pow(&self, p: f64) -> Self{
+        Vec3 { 
+            x: self.x.powf(p),
+            y: self.y.powf(p),
+            z: self.z.powf(p)
         }
     }
 

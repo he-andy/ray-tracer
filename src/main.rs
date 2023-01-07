@@ -27,10 +27,7 @@ fn main() {
     
     //Render
     
-    if let Err(e) = camera.render(IMAGE_HEIGHT, &world, SAMPLES_PER_PIXEL){
-        eprintln!("Application Error: {e}");
-        process::exit(1);
-    }
+    camera.render(IMAGE_HEIGHT, &world, SAMPLES_PER_PIXEL);
 
     // if let Err(e) = gradient(IMAGE_WIDTH, IMAGE_HEIGHT){
     //     eprintln!("Application Error: {e}");

@@ -14,6 +14,7 @@ pub use sphere::Sphere;
 pub use camera::Camera;
 pub use std::f64::INFINITY;
 pub use std::f64::consts::PI;
+pub use image::{Image};
 
 
 use rand::Rng;
