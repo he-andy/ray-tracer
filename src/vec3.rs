@@ -1,7 +1,7 @@
 use std::ops::{Neg, Add, Sub, Mul, Div, AddAssign, SubAssign, MulAssign, DivAssign};
 use crate::rand_range;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Default)]
 pub struct Vec3{
     pub x: f64, 
     pub y: f64,
@@ -116,6 +116,30 @@ impl Vec3{
         self.x.abs() < thresh && self.y.abs() < thresh && self.z.abs() < thresh
     }
 
+    pub fn get(&self, i: i32) -> f64 {
+        match i{
+            0 => self.x,
+            1 => self.y,
+            2 => self.z,
+            _ => panic!("Out of Bounds")
+        }
+    }
+
+    pub fn min(v1: &Vec3, v2: &Vec3) -> Vec3 {
+        Vec3{ 
+            x: f64::min(v1.x, v2.x),
+            y: f64::min(v1.y, v2.y),
+            z: f64::min(v1.z, v2.z)
+        }
+    }
+
+    pub fn max(v1: &Vec3, v2: &Vec3) -> Vec3 {
+        Vec3{ 
+            x: f64::max(v1.x, v2.x),
+            y: f64::max(v1.y, v2.y),
+            z: f64::max(v1.z, v2.z)
+        }
+    }
    
 }
 

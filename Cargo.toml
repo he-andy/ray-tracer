@@ -9,3 +9,5 @@ edition = "2021"
 indicatif = {version = "*", features = ["rayon"]}
 rand = "0.8.5"
 rayon = "1.6.1"
+timed = "0.2.1"
+log = "0.4"

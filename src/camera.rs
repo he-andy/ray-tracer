@@ -1,6 +1,6 @@
 use crate::*;
 use indicatif::{ParallelProgressIterator, ProgressStyle};
-use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+use rayon::iter::{ParallelIterator};
 use rayon::prelude::*;
 
 const MAX_DEPTH: i32 = 50;
@@ -62,7 +62,7 @@ impl Camera {
         )
     }
 
-    fn ray_cast(&self, i: i32, j: i32, height: i32, width: i32, world: &HittableList) -> Color {
+    fn ray_cast(&self, i: i32, j: i32, height: i32, width: i32, world: &dyn Hittable) -> Color {
         let u = (i as f64 + rand()) / (width - 1) as f64;
         let v = (j as f64 + rand()) / (height - 1) as f64;
 
@@ -70,7 +70,7 @@ impl Camera {
         ray_color(r, world, MAX_DEPTH)
     }
 
-    pub fn render(&self, height: i32, world: &HittableList, n_samples: i32) {
+    pub fn render(&self, height: i32, world: &dyn Hittable, n_samples: i32) {
         let width = (height as f64 * self.aspect_ratio) as i32;
         let dims = (height, width);
 
@@ -94,7 +94,7 @@ impl Camera {
         img.save();
     }
 
-    pub fn render_helper(&self, dims: (i32, i32), world: &HittableList) -> Image {
+    pub fn render_helper(&self, dims: (i32, i32), world: &dyn Hittable) -> Image {
         let (height, width) = dims;
         let mut img = Image::new(height, width);
 
@@ -109,7 +109,7 @@ impl Camera {
 }
 
 //Rendering
-fn ray_color(r: Ray, world: &HittableList, depth: i32) -> Color {
+fn ray_color(r: Ray, world: &dyn Hittable, depth: i32) -> Color {
     if depth > 0 {
         match world.hit(&r, 0.001, INFINITY) {
             HitRecord::Hit {

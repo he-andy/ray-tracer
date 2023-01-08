@@ -1,11 +1,15 @@
 use ray_tracer::*;
+use timed::timed;
+#[macro_use] extern crate log;
 
+#[timed::timed(tracing(enabled = true), duration(disabled = true))]
 fn main() {
+    let trace = timed::Trace::new("Main");
     //Image
     const ASPECT_RATIO: f64 = 3.0 / 2.0;
-    const IMAGE_WIDTH: i32 = 1200;
+    const IMAGE_WIDTH: i32 = 90;
     const IMAGE_HEIGHT: i32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as i32;
-    const SAMPLES_PER_PIXEL: i32 = 500;
+    const SAMPLES_PER_PIXEL: i32 = 1;
 
     // if let Err(e) = gradient(IMAGE_WIDTH, IMAGE_HEIGHT){
     //     eprintln!("Application Error: {e}");
@@ -29,12 +33,16 @@ fn main() {
         aperture,
     );
 
+    let world = BVH::from_hittable_list(random_scene());  
+    eprintln!("#balls {}", random_scene().list.len());
+    eprintln!("height of tree: {}", world.height());
     let world = random_scene();
-
+    
     //Render
 
     camera.render(IMAGE_HEIGHT, &world, SAMPLES_PER_PIXEL);
 
+    println!("{}", trace.statistics());
     // if let Err(e) = gradient(IMAGE_WIDTH, IMAGE_HEIGHT){
     //     eprintln!("Application Error: {e}");
     //     process::exit(1);
@@ -74,15 +82,16 @@ fn random_scene() -> HittableList {
                     world.add(Sphere::new(center, 0.2, mat));
                 }
             }
-
-            let mat1 = materials::Dielectric::new(1.5);
-            world.add(Sphere::new(Point::new(0.0, 1.0, 0.0), 1.0, mat1));
-
-            let mat2 = materials::Lambertian::new(0.4, 0.2, 0.1);
-            world.add(Sphere::new(Point::new(-4.0, 1.0, 0.0), 1.0, mat2));
-            let mat3 = materials::Metal::new(0.7, 0.6, 0.5, 0.0);
-            world.add(Sphere::new(Point::new(4.0, 1.0, 0.0), 1.0, mat3));
         }
     }
+
+    let mat1 = materials::Dielectric::new(1.5);
+    world.add(Sphere::new(Point::new(0.0, 1.0, 0.0), 1.0, mat1));
+
+    let mat2 = materials::Lambertian::new(0.4, 0.2, 0.1);
+    world.add(Sphere::new(Point::new(-4.0, 1.0, 0.0), 1.0, mat2));
+    
+    let mat3 = materials::Metal::new(0.7, 0.6, 0.5, 0.0);
+    world.add(Sphere::new(Point::new(4.0, 1.0, 0.0), 1.0, mat3));
     world
 }

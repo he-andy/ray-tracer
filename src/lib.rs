@@ -4,6 +4,7 @@ mod hittable;
 mod sphere;
 mod camera;
 mod image;
+mod bvh;
 
 pub mod materials;
 
@@ -15,6 +16,7 @@ pub use camera::Camera;
 pub use std::f64::INFINITY;
 pub use std::f64::consts::PI;
 pub use image::{Image};
+pub use bvh::{BVH, AABB};
 
 
 use rand::Rng;

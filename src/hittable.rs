@@ -1,6 +1,6 @@
-use crate::{Point, Vec3, Ray};
+use crate::{Point, Vec3, Ray, AABB};
 use crate::materials::*;
-use std::process;
+use std::{process};
 
 pub enum HitRecord<'a>{
     Hit {
@@ -14,6 +14,7 @@ pub enum HitRecord<'a>{
 }
 pub trait Hittable : Sync{
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> HitRecord;
+    fn bounding_box(&self) -> AABB;
 }
 
 impl<'a> HitRecord<'a>{
@@ -57,8 +58,11 @@ impl HittableList{
     pub fn clear(&mut self){
         self.list = Vec::new()
     }
+}
 
-    pub fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> HitRecord{
+impl Hittable for HittableList{
+    #[timed::timed(tracing(enabled = true), duration(disabled = true))]
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> HitRecord{
         let mut closest_so_far = t_max;
         let mut obj_hit = HitRecord::Miss;
 
@@ -72,4 +76,19 @@ impl HittableList{
 
         obj_hit
     }
+
+    fn bounding_box(&self) -> AABB {
+        if self.list.is_empty() {
+            return AABB::default();
+        }
+
+        let mut bounding_box = self.list[0].bounding_box();
+        
+        for obj in self.list[1..].iter(){
+            bounding_box.expand(&obj.bounding_box());
+        }
+
+        bounding_box
+    }
 }
+

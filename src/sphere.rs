@@ -1,5 +1,5 @@
 use crate::hittable::{Hittable, HitRecord};
-use crate::{Point, Ray};
+use crate::{Point, Ray, AABB};
 use crate::materials::*;
 
 pub struct Sphere<M: Mat>{
@@ -15,7 +15,9 @@ impl<M: Mat> Sphere<M>{
 }
 
 impl<M: Mat> Hittable for Sphere<M>{
+    #[timed::timed(tracing(enabled = true), duration(disabled = true))]
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> HitRecord{
+        println!("sphere hit");
         let oc = r.origin - self.center;
         let a = r.dir.l2();
         let half_b = r.dir.dot(&oc);
@@ -40,4 +42,11 @@ impl<M: Mat> Hittable for Sphere<M>{
         
         HitRecord::new(p, t, normal, &r, &self.material)
     }   
+
+    fn bounding_box(&self) -> AABB {
+        AABB { 
+            min: self.center - Point::new(self.radius, self.radius, self.radius), 
+            max: self.center + Point::new(self.radius, self.radius, self.radius) 
+        }
+    }
 }                                                                                       
