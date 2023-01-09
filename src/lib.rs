@@ -7,6 +7,7 @@ mod sphere;
 mod vec3;
 
 pub mod materials;
+pub mod scenes;
 pub mod texture;
 
 pub use bvh::{AABB, BVH};

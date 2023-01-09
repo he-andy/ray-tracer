@@ -1,47 +1,30 @@
-use crate::{Color, Point, Ray, Vec3};
+use crate::texture::{Texture};
+use crate::{Color, HitRecord, Ray, Vec3};
 
 pub trait Mat: Sync {
     //returns Some of Color (attenuation) and Ray (scatter dir) or None
-    fn scatter(
-        &self,
-        r_in: Ray,
-        p: &Point,
-        normal: &Vec3,
-        front_face: bool,
-    ) -> Option<(Color, Ray)>;
+    fn scatter(&self, r_in: Ray, rec: &HitRecord) -> Option<(Color, Ray)>;
 }
 
-pub struct Lambertian {
-    pub albedo: Vec3,
+pub struct Lambertian<T: Texture> {
+    pub albedo: T,
 }
 
-impl Lambertian {
-    pub fn new(r: f64, g: f64, b: f64) -> Self {
-        Self {
-            albedo: Vec3::new(r.clamp(0.0, 1.0), g.clamp(0.0, 1.0), b.clamp(0.0, 1.0)),
-        }
-    }
-
-    pub fn from_vec(albedo: Vec3) -> Self {
+impl<T: Texture> Lambertian<T> {
+    pub fn new(albedo: T) -> Self {
         Self { albedo }
     }
 }
 
-impl Mat for Lambertian {
-    fn scatter(
-        &self,
-        _r_in: Ray,
-        p: &Point,
-        normal: &Vec3,
-        _front_face: bool,
-    ) -> Option<(Color, Ray)> {
-        let mut scatter_dir = *normal + Vec3::rand_within_unit_sphere().unit();
+impl<T: Texture> Mat for Lambertian<T> {
+    fn scatter(&self, _r_in: Ray, rec: &HitRecord) -> Option<(Color, Ray)> {
+        let mut scatter_dir = rec.normal + Vec3::rand_within_unit_sphere().unit();
         //fix degenerate case
         if scatter_dir.near_zero() {
-            scatter_dir = *normal
+            scatter_dir = rec.normal
         }
-        let scattered = Ray::new(*p, scatter_dir);
-        Some((self.albedo, scattered))
+        let scattered = Ray::new(rec.p, scatter_dir);
+        Some((self.albedo.value(rec.u, rec.v, &rec.p), scattered))
     }
 }
 
@@ -69,16 +52,13 @@ impl Metal {
 }
 
 impl Mat for Metal {
-    fn scatter(
-        &self,
-        r_in: Ray,
-        p: &Point,
-        normal: &Vec3,
-        _front_face: bool,
-    ) -> Option<(Color, Ray)> {
-        let reflected = reflect(&r_in.dir.unit(), normal);
-        let scattered = Ray::new(*p, reflected + self.fuzz * Vec3::rand_within_unit_sphere());
-        if scattered.dir.dot(normal) > 0.0 {
+    fn scatter(&self, r_in: Ray, rec: &HitRecord) -> Option<(Color, Ray)> {
+        let reflected = reflect(&r_in.dir.unit(), &rec.normal);
+        let scattered = Ray::new(
+            rec.p,
+            reflected + self.fuzz * Vec3::rand_within_unit_sphere(),
+        );
+        if scattered.dir.dot(&rec.normal) > 0.0 {
             Some((self.albedo, scattered))
         } else {
             None
@@ -109,29 +89,27 @@ impl Dielectric {
 }
 
 impl Mat for Dielectric {
-    fn scatter(
-        &self,
-        r_in: Ray,
-        p: &Point,
-        normal: &Vec3,
-        front_face: bool,
-    ) -> Option<(Color, Ray)> {
+    fn scatter(&self, r_in: Ray, rec: &HitRecord) -> Option<(Color, Ray)> {
         let att = Color::new(1.0, 1.0, 1.0);
-        let refraction_ratio = if front_face { 1.0 / self.ir } else { self.ir };
+        let refraction_ratio = if rec.front_face {
+            1.0 / self.ir
+        } else {
+            self.ir
+        };
 
         let unit_dir = r_in.dir.unit();
 
-        let cos_theta = f64::min((-unit_dir).dot(normal), 1.0);
+        let cos_theta = f64::min((-unit_dir).dot(&rec.normal), 1.0);
         let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
 
         let cannot_refract = refraction_ratio * sin_theta > 1.0;
 
         let dir = if cannot_refract || reflectance(cos_theta, refraction_ratio) > crate::rand() {
-            reflect(&unit_dir, normal)
+            reflect(&unit_dir, &rec.normal)
         } else {
-            refract(&unit_dir, normal, refraction_ratio)
+            refract(&unit_dir, &rec.normal, refraction_ratio)
         };
-        let scattered = Ray::new(*p, dir);
+        let scattered = Ray::new(rec.p, dir);
         Some((att, scattered))
     }
 }

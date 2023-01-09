@@ -112,13 +112,7 @@ impl Camera {
 fn ray_color(r: Ray, world: &dyn Hittable, depth: i32) -> Color {
     if depth > 0 {
         match world.hit(&r, 0.001, INFINITY) {
-            Some(HitRecord {
-                normal,
-                p,
-                material,
-                front_face,
-                ..
-            }) => match material.scatter(r, &p, &normal, front_face) {
+            Some(rec) => match rec.material.scatter(r, &rec) {
                 Some((attenuation, r_out)) => attenuation * ray_color(r_out, world, depth - 1),
                 None => Color::zero(),
             },
