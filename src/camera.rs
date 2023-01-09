@@ -1,6 +1,6 @@
 use crate::*;
 use indicatif::{ParallelProgressIterator, ProgressStyle};
-use rayon::iter::{ParallelIterator};
+use rayon::iter::ParallelIterator;
 use rayon::prelude::*;
 
 const MAX_DEPTH: i32 = 50;
@@ -112,17 +112,17 @@ impl Camera {
 fn ray_color(r: Ray, world: &dyn Hittable, depth: i32) -> Color {
     if depth > 0 {
         match world.hit(&r, 0.001, INFINITY) {
-            HitRecord::Hit {
+            Some(HitRecord {
                 normal,
                 p,
                 material,
                 front_face,
                 ..
-            } => match material.scatter(r, &p, &normal, front_face) {
+            }) => match material.scatter(r, &p, &normal, front_face) {
                 Some((attenuation, r_out)) => attenuation * ray_color(r_out, world, depth - 1),
                 None => Color::zero(),
             },
-            HitRecord::Miss => {
+            None => {
                 let unit_dir = r.dir.unit();
                 let t = 0.5 * (unit_dir.y + 1.0);
                 Color::new(0.5, 0.7, 1.0);
