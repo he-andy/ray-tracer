@@ -1,9 +1,10 @@
-use crate::{Color, Point};
+use crate::{Color, Perlin, Point};
 
 pub trait Texture: Sync {
     fn value(&self, u: f64, v: f64, p: &Point) -> Color;
 }
 
+#[derive(Clone)]
 pub struct Solid {
     pub color: Color,
 }
@@ -25,6 +26,7 @@ impl Texture for Solid {
     }
 }
 
+#[derive(Clone)]
 pub struct Checkered<T: Texture, U: Texture> {
     odd: T,
     even: U,
@@ -44,5 +46,24 @@ impl<T: Texture, U: Texture> Texture for Checkered<T, U> {
         } else {
             self.even.value(u, v, p)
         }
+    }
+}
+
+#[derive(Clone)]
+pub struct Noisy {
+    noise: Perlin,
+}
+
+impl Noisy {
+    pub fn new() -> Self {
+        Self {
+            noise: Perlin::new(),
+        }
+    }
+}
+
+impl Texture for Noisy {
+    fn value(&self, _u: f64, _v: f64, p: &Point) -> Color {
+        Color::new(1.0, 1.0, 1.0) * self.noise.noise(p)
     }
 }

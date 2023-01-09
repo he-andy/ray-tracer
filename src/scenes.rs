@@ -71,3 +71,79 @@ pub fn random_scene() -> (Camera, HittableList) {
         world
     }
 }
+
+pub fn checkered() -> (Camera, HittableList) {
+    let look_from = Point::new(13.0, 2.0, 3.0);
+    let look_at = Point::new(0.0, 0.0, 0.0);
+    let v_up = Point::new(0.0, 1.0, 0.0);
+    let dist_to_focus = 10.0;
+    let aperture = 0.0;
+
+    let camera = Camera::new(
+        40.0,
+        3.0 / 2.0,
+        &look_from,
+        &look_at,
+        &v_up,
+        dist_to_focus,
+        aperture,
+    );
+
+    let mut world = HittableList::default();
+
+    let checkered_texture = texture::Checkered::new(
+        texture::Solid::new(0.2, 0.3, 0.1),
+        texture::Solid::new(0.9, 0.9, 0.9),
+    );
+
+    world.add(Sphere::new(
+        Point::new(0.0, -10.0, 0.0),
+        10.0,
+        materials::Lambertian::new(checkered_texture.clone()),
+    ));
+
+    world.add(Sphere::new(
+        Point::new(0.0, 10.0, 0.0),
+        10.0,
+        materials::Lambertian::new(checkered_texture.clone()),
+    ));
+
+    (camera, world)
+}
+
+pub fn two_perlin_spheres() -> (Camera, HittableList) {
+    let look_from = Point::new(13.0, 2.0, 3.0);
+    let look_at = Point::new(0.0, 0.0, 0.0);
+    let v_up = Point::new(0.0, 1.0, 0.0);
+    let dist_to_focus = 10.0;
+    let aperture = 0.1;
+
+    let camera = Camera::new(
+        20.0,
+        3.0 / 2.0,
+        &look_from,
+        &look_at,
+        &v_up,
+        dist_to_focus,
+        aperture,
+    );
+
+    let mut world = HittableList::default();
+
+    let pertext = texture::Noisy::new();
+    let ground_mat = materials::Lambertian::new(pertext);
+
+    world.add(Sphere::new(
+        Point::new(0.0, -1000.0, -1.0),
+        1000.0,
+        ground_mat,
+    ));
+
+    // world.add(Sphere::new(
+    //     Point::new(0.0, 2.0, -1.0),
+    //     2.0,
+    //     ground_mat.clone(),
+    // ));
+
+    (camera, world)
+}

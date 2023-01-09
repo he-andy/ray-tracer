@@ -1,4 +1,4 @@
-use crate::texture::{Texture};
+use crate::texture::Texture;
 use crate::{Color, HitRecord, Ray, Vec3};
 
 pub trait Mat: Sync {
@@ -6,6 +6,7 @@ pub trait Mat: Sync {
     fn scatter(&self, r_in: Ray, rec: &HitRecord) -> Option<(Color, Ray)>;
 }
 
+#[derive(Copy, Clone)]
 pub struct Lambertian<T: Texture> {
     pub albedo: T,
 }
