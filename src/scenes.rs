@@ -136,14 +136,14 @@ pub fn two_perlin_spheres() -> (Camera, HittableList) {
     world.add(Sphere::new(
         Point::new(0.0, -1000.0, -1.0),
         1000.0,
-        ground_mat,
+        ground_mat.clone(),
     ));
 
-    // world.add(Sphere::new(
-    //     Point::new(0.0, 2.0, -1.0),
-    //     2.0,
-    //     ground_mat.clone(),
-    // ));
+    world.add(Sphere::new(
+        Point::new(0.0, 2.0, -1.0),
+        2.0,
+        ground_mat.clone(),
+    ));
 
     (camera, world)
 }

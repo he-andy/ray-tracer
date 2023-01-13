@@ -45,10 +45,22 @@ impl Perlin {
     }
 
     pub fn noise(&self, p: &Point) -> f64 {
-        let i = (4.0 * p.x).floor() as usize & 255;
-        let j = (4.0 * p.y).floor() as usize & 255;
-        let k = (4.0 * p.z).floor() as usize & 255;
+        let u = p.x - p.x.floor();
+        let v = p.y - p.y.floor();
+        let w = p.z - p.z.floor();
 
-        self.ranfloat[self.perm_x[i] ^ self.perm_y[j] ^ self.perm_z[k]]
+        let i = (4.0 * p.x).floor() as usize;
+        let j = (4.0 * p.y).floor() as usize;
+        let k = (4.0 * p.z).floor() as usize;
+        
+        for i in 0..2 {
+            for j in 0..2 {
+                for k in 0..2 {
+
+                }
+            }
+        }
+
+        self.ranfloat[self.perm_x[i as usize] ^ self.perm_y[j as usize] ^ self.perm_z[k as usize]]
     }
 }
